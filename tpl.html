@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>作文小學堂</title>
+  <link rel="manifest" href="wr-manifest.json">
+  <meta name="theme-color" content="#ffe8c2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="作文小學堂">
+  <link rel="apple-touch-icon" href="wr-icon-180.png">
+  <link rel="icon" href="wr-icon-192.png">
+  <style>
+{{CSS}}
+    body.nozy rt { display: none; }
+    h3.lv { margin: 12px 4px 6px; font-size: 22px; color: #a34a12; }
+    h3.lv small { font-size: 15px; font-weight: normal; color: #8a6d57; margin-left: 8px; }
+    .les-title { font-size: clamp(30px, 6vw, 48px); font-weight: bold; color: var(--red); text-align: center; line-height: 1.4; }
+    .hub-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; width: min(760px, 94vw); }
+    .hub-btns .big-btn { width: 100%; }
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: min(900px, 96vw); }
+    .panels .scene { width: 100%; border-width: 4px; border-radius: 18px; }
+    .panels .scene .no { position: absolute; left: 6px; top: 4px; z-index: 3; background: var(--red); color: #fff; font-weight: bold; border-radius: 999px; padding: 0 10px; font-size: 5cqw; }
+    .one-scene { width: min(560px, 90vw); }
+    .sub-box { text-align: left; font-size: clamp(22px, 3.6vw, 30px); line-height: 1.9; }
+    .sub-box.big { text-align: center; font-size: clamp(26px, 4.6vw, 38px); }
+    .card { width: min(900px, 96vw); background: #fff; border: 5px solid #f3c27a; border-radius: 22px; padding: 12px 18px; }
+    .card h4 { margin: 0 0 6px; font-size: 24px; color: #a34a12; }
+    .card p { margin: 4px 0; font-size: 22px; line-height: 1.7; }
+    .say { border: 0; background: var(--orange); color: #fff; border-radius: 999px; min-width: 44px; height: 44px; font-size: 20px; flex: none; padding: 0 10px; }
+    .rowl { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 2px dashed #f3dfb7; font-size: 22px; line-height: 1.7; }
+    .rowl:last-child { border-bottom: 0; }
+    .rowl .kbox { flex: 1; }
+    .rowl .kbox .c.done { color: var(--red); }
+    .rowl .kbox .c.now { color: #fff; background: var(--red); border-radius: 6px; }
+    .eg { color: #6b4a2b; }
+    .dots { font-size: 26px; letter-spacing: 6px; color: var(--orange); }
+    .hint { font-size: 20px; color: #7a5a3a; text-align: center; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: min(900px, 96vw); }
+    .chip { border: 3px solid var(--orange); background: #fff; color: #c2410c; font-weight: bold; font-size: 20px; border-radius: 999px; padding: 6px 14px; }
+    .chip:active { background: #fff3b8; }
+    textarea { width: min(900px, 96vw); min-height: 150px; border: 5px solid #f3c27a; border-radius: 20px; padding: 12px 16px; font-size: 26px; line-height: 1.7; font-family: inherit; color: var(--ink); background: #fff; user-select: text; -webkit-user-select: text; resize: vertical; }
+    textarea:focus { outline: none; border-color: var(--orange); }
+    .peek { width: min(900px, 96vw); background: #fffbe8; border: 3px dashed #e8b762; border-radius: 16px; padding: 8px 14px; font-size: 20px; line-height: 1.7; color: #6b4a2b; }
+    .cks { width: min(900px, 96vw); display: grid; gap: 8px; }
+    .ck { display: flex; align-items: center; gap: 12px; background: #fff; border: 4px solid #f3c27a; border-radius: 16px; padding: 10px 14px; font-size: 22px; font-weight: 600; text-align: left; color: var(--ink); }
+    .ck .b { width: 34px; height: 34px; border-radius: 8px; border: 3px solid var(--orange); background: #fff; flex: none; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
+    .ck.on { border-color: var(--ok); background: #e6f8dc; }
+    .ck.on .b { background: var(--ok); border-color: var(--ok); }
+    .msg { min-height: 34px; font-size: 24px; font-weight: bold; color: #2c7a2c; text-align: center; }
+    .bq { font-size: clamp(24px, 4.4vw, 34px); font-weight: bold; text-align: center; }
+    .bopts { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; width: min(900px, 96vw); }
+    .bopt { border: 5px solid var(--orange); background: #fff3b8; border-radius: 22px; padding: 10px 18px; font-size: 28px; font-weight: bold; color: #c2410c; box-shadow: 0 4px 0 #c8721a; }
+    .bopt .e { display: block; font-size: 52px; line-height: 1.2; }
+    .bopt:active { transform: translateY(3px); box-shadow: 0 1px 0 #c8721a; }
+    .picks { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; min-height: 74px; }
+    .pk { border: 4px solid var(--ok); background: #e6f8dc; border-radius: 18px; padding: 4px 14px; font-size: 34px; color: #2c7a2c; font-weight: bold; }
+    .work { width: min(900px, 96vw); background: #fff; border: 5px solid #f3c27a; border-radius: 22px; padding: 12px 18px; }
+    .work h4 { margin: 0 0 4px; font-size: 24px; color: #a34a12; }
+    .work .d { font-size: 15px; color: #8a6d57; }
+    .work .txt { font-size: 22px; line-height: 1.8; margin: 6px 0; }
+    .work .txt .c.done { color: var(--red); }
+    .work .txt .c.now { color: #fff; background: var(--red); border-radius: 6px; }
+    .work .row .pill { font-size: 18px; padding: 6px 14px; }
+  </style>
+</head>
+<body>
+
+<!-- 首頁 -->
+<div class="screen active" id="home">
+  <h1>✏️ 作文小學堂 <span class="ver" id="ver"></span></h1>
+  <div class="sub">每天寫一點點，就會越寫越好 ✨</div>
+  <button class="big-btn" data-go="works">📒 我的作品<small id="worksN"></small></button>
+  <div class="shelf" id="shelf"></div>
+</div>
+
+<!-- 課程主頁 -->
+<div class="screen" id="hub">
+  <button class="round-btn" data-go="home">⬅️</button>
+  <div class="les-title" id="hbTitle"></div>
+  <div class="sub" id="hbSub"></div>
+  <div class="hub-btns">
+    <button class="big-btn" id="bModel">👀 看範文<small>先看一篇範文</small></button>
+    <button class="big-btn" id="bLearn">💡 學一學<small>學一個寫作的小技巧</small></button>
+    <button class="big-btn" id="bWrite">✍️ 寫一寫<small>一步一步寫</small></button>
+    <button class="big-btn" id="bRead">🎤 讀一讀<small>念自己的作文、存起來</small></button>
+  </div>
+</div>
+
+<!-- 看範文 -->
+<div class="screen" id="model">
+  <button class="round-btn" data-go="hub">⬅️</button>
+  <h2 id="mdTitle"></h2>
+  <div class="panels" id="mdPanels"></div>
+  <div class="sub-box" id="mdBox"></div>
+  <div class="row"><button class="pill" id="mdPlay">🔊 念給我聽</button></div>
+</div>
+
+<!-- 學一學 -->
+<div class="screen" id="learn">
+  <button class="round-btn" data-go="hub">⬅️</button>
+  <h2 id="lnTitle"></h2>
+  <div id="lnCards" style="display:flex;flex-direction:column;gap:12px;align-items:center;width:100%"></div>
+</div>
+
+<!-- 寫一寫 -->
+<div class="screen" id="write">
+  <button class="round-btn" data-go="hub">⬅️</button>
+  <div class="dots" id="wrDots"></div>
+  <div id="wrScene"></div>
+  <h2 id="wrH"></h2>
+  <div class="hint" id="wrHint"></div>
+  <div class="chips" id="wrChips"></div>
+  <textarea id="wrText" placeholder="寫在這裡～想不到也沒關係，先點上面的小提示"></textarea>
+  <div class="row">
+    <button class="pill" id="wrSay">🔊 念我寫的</button>
+    <button class="pill" id="wrPeek">👀 偷看範文</button>
+  </div>
+  <div class="peek" id="wrModel" hidden></div>
+  <div class="row">
+    <button class="pill" id="wrPrev">◀ 上一步</button>
+    <button class="pill" id="wrNext">下一步 ▶</button>
+  </div>
+</div>
+
+<!-- 讀一讀 -->
+<div class="screen" id="done">
+  <button class="round-btn" data-go="hub">⬅️</button>
+  <h2 id="dnTitle"></h2>
+  <div class="sub-box" id="dnBox"></div>
+  <div class="row"><button class="pill" id="dnPlay">🔊 念我的作文</button></div>
+  <div class="sub" id="dnCkT">看看自己做到了哪些？（點一點打勾）</div>
+  <div class="cks" id="dnChecks"></div>
+  <div class="msg" id="dnMsg"></div>
+  <div class="row">
+    <button class="pill" data-go="write">✍️ 回去修改</button>
+    <button class="pill" id="dnSave">⭐ 存到我的作品</button>
+  </div>
+</div>
+
+<!-- 點選拼句 -->
+<div class="screen" id="build">
+  <button class="round-btn" data-go="home">⬅️</button>
+  <div class="les-title" id="bdTitle"></div>
+  <div class="picks" id="bdPicks"></div>
+  <div class="bq" id="bdQ"></div>
+  <div class="bopts" id="bdOpts"></div>
+  <div class="sub-box big" id="bdBox" hidden></div>
+  <div class="msg" id="bdMsg"></div>
+  <div class="row" id="bdBtns" hidden>
+    <button class="pill" id="bdPlay">🔊 念給我聽</button>
+    <button class="pill" id="bdSave">⭐ 存起來</button>
+    <button class="pill" id="bdAgain">🔄 再玩一次</button>
+  </div>
+</div>
+
+<!-- 我的作品 -->
+<div class="screen" id="works">
+  <button class="round-btn" data-go="home">⬅️</button>
+  <h2>📒 我的作品</h2>
+  <div id="wkList" style="display:flex;flex-direction:column;gap:12px;align-items:center;width:100%"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="data2.js"></script>
+<script>
+const APP_VER = 'v2026.11.06-1';
+document.getElementById('ver').textContent = APP_VER;
+{{JS}}
+LESSONS.forEach((l, i) => l.id = i);
+
+// ---------- 讀出來：按一下開始，再按暫停，再按從那一句接著讀 ----------
+let rd = { btn: null, st: '', pos: 0 };
+function rdReset() { karStop(); if (rd.btn) rd.btn.textContent = rd.btn.dataset.idle || '🔊'; rd = { btn: null, st: '', pos: 0 }; }
+function rdToggle(btn, box) {
+  const text = Array.from(box.querySelectorAll('.c')).map(c => c.textContent).join('');
+  if (!text) return;
+  const idle = btn.dataset.idle || (btn.dataset.idle = btn.textContent);
+  const long = idle.length > 2;
+  if (rd.btn === btn && rd.st === 'play') { const p = karPos; karStop(); rd.pos = p; rd.st = 'pause'; btn.textContent = long ? '▶ 繼續' : '▶'; return; }
+  const from = (rd.btn === btn && rd.st === 'pause') ? rd.pos : 0;
+  if (rd.btn !== btn) { const old = rd.btn, ob = old && old._box; rdReset(); if (ob) karShow(ob, -1); } else karStop();
+  rd = { btn, st: 'play', pos: from }; btn._box = box;
+  btn.textContent = long ? '⏸ 暫停' : '⏸';
+  karSay(text, box, () => { btn.textContent = idle; rd = { btn: null, st: '', pos: 0 }; }, from);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.say'); if (!b) return;
+  const box = b.parentElement.querySelector('.kbox'); if (box) rdToggle(b, box);
+});
+
+const prog = () => store.get('wrProg', {});
+function mark(id, what) { const p = prog(); (p[id] = p[id] || {})[what] = 1; store.set('wrProg', p); }
+const praise = () => { chime(); return pick(PRAISE); };
+const paras = ps => ps.map(kChars).join('<br>');
+
+// ---------- 畫面切換 ----------
+let cur = null;
+function show(id) {
+  rdReset(); karStop();
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo(0, 0);
+  if (id === 'home') renderHome();
+  if (id === 'hub') renderHub();
+  if (id === 'works') renderWorks();
+  if (id === 'write') renderWrite();
+  if (id === 'done') renderDone();
+}
+document.addEventListener('click', e => {
+  const g = e.target.closest('[data-go]'); if (!g) return;
+  show(g.dataset.go);
+});
+
+// ---------- 首頁 ----------
+const sceneHTML = s => `<div class="scene ${'bg-' + s.bg}">${s.items.map(it => `<span class="it ${it.a}" style="left:${it.x}%;top:${it.y}%;font-size:${it.z}cqw">${it.e}</span>`).join('')}</div>`;
+function renderHome() {
+  const p = prog(); let h = '';
+  LEVELS.forEach((lv, li) => {
+    h += `<h3 class="lv">${lv.ic} ${esc(lv.n)}<small>${esc(lv.d)}</small></h3><div class="books">` +
+      LESSONS.filter(l => l.lv === li).map(l => {
+        const n = Object.keys(p[l.id] || {}).length;
+        return `<button class="book" data-l="${l.id}"><div class="cv">${l.em}</div><div class="t">${esc(l.t)}</div><div class="m">${esc(l.m)}</div><div class="m">${n ? '⭐'.repeat(n) : '　'}</div></button>`;
+      }).join('') + '</div>';
+  });
+  $('shelf').innerHTML = h;
+  const w = store.get('wrWorks', []); $('worksN').textContent = w.length ? `已經存了 ${w.length} 篇` : '還沒有作品，來寫第一篇吧！';
+}
+$('shelf').onclick = e => {
+  const b = e.target.closest('.book'); if (!b) return;
+  cur = LESSONS[+b.dataset.l];
+  cur.kind === 'build' ? startBuild() : show('hub');
+};
+
+// ---------- 課程主頁 ----------
+function renderHub() {
+  const p = prog()[cur.id] || {};
+  $('hbTitle').textContent = cur.em + ' ' + cur.t;
+  $('hbSub').textContent = LEVELS[cur.lv].n + '：' + cur.m;
+  [['bModel', 'model'], ['bLearn', 'learn'], ['bWrite', 'write'], ['bRead', 'read']].forEach(([b, k]) => $(b).classList.toggle('done', !!p[k]));
+}
+$('bModel').onclick = () => { mark(cur.id, 'model'); renderModel(); show('model'); };
+$('bLearn').onclick = () => { mark(cur.id, 'learn'); renderLearn(); show('learn'); };
+$('bWrite').onclick = () => { wStep = 0; show('write'); };
+$('bRead').onclick = () => show('done');
+
+// ---------- 看範文 ----------
+function renderModel() {
+  $('mdTitle').textContent = cur.t + '（範文）';
+  $('mdPanels').innerHTML = (cur.panels || []).map((s, i) => sceneHTML(s).replace('<div class="scene', `<div class="scene`).replace('">', `"><span class="no">${i + 1}</span>`)).join('');
+  $('mdPanels').style.display = cur.panels ? 'grid' : 'none';
+  $('mdBox').innerHTML = paras(cur.model);
+  const b = $('mdPlay'); b.textContent = '🔊 念給我聽'; b.dataset.idle = '🔊 念給我聽';
+}
+$('mdPlay').onclick = () => rdToggle($('mdPlay'), $('mdBox'));
+
+// ---------- 學一學 ----------
+function renderLearn() {
+  $('lnTitle').textContent = '💡 ' + cur.t + '：學一學';
+  $('lnCards').innerHTML = cur.learn.map(([t, d, ex]) =>
+    `<div class="card"><h4>${esc(t)}</h4>
+       <div class="rowl"><button class="say">🔊</button><div class="kbox">${kChars(d)}</div></div>` +
+    ex.map(x => `<div class="rowl eg"><button class="say">🔊</button><div class="kbox">${kChars(x)}</div></div>`).join('') + '</div>').join('');
+}
+
+// ---------- 寫一寫 ----------
+let wStep = 0;
+const draftKey = () => 'wrDraft' + cur.id;
+const getDraft = () => store.get(draftKey(), []);
+function setDraftAt(i, v) { const d = getDraft(); d[i] = v; store.set(draftKey(), d); }
+function renderWrite() {
+  const st = cur.steps[wStep], n = cur.steps.length;
+  $('wrDots').textContent = cur.steps.map((_, i) => i < wStep ? '●' : i === wStep ? '◉' : '○').join(' ');
+  $('wrScene').innerHTML = cur.panels ? sceneHTML(cur.panels[wStep]).replace('class="scene', 'class="scene one-scene') : '';
+  $('wrH').textContent = `${wStep + 1}／${n}　${st.h}`;
+  $('wrHint').textContent = st.hint;
+  $('wrChips').innerHTML = st.starters.map(s => `<button class="chip">${esc(s)}</button>`).join('');
+  $('wrText').value = getDraft()[wStep] || '';
+  $('wrModel').hidden = true; $('wrModel').textContent = cur.model.join('\n'); $('wrModel').style.whiteSpace = 'pre-wrap';
+  $('wrPrev').style.visibility = wStep ? 'visible' : 'hidden';
+  $('wrNext').textContent = wStep === n - 1 ? '寫完了 ✔' : '下一步 ▶';
+}
+$('wrChips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; const t = $('wrText'); t.value += c.textContent; setDraftAt(wStep, t.value); t.focus(); };
+$('wrText').oninput = () => setDraftAt(wStep, $('wrText').value);
+$('wrSay').onclick = () => { const t = $('wrText').value.trim(); if (t) sayPlain(t); };
+$('wrPeek').onclick = () => { $('wrModel').hidden = !$('wrModel').hidden; };
+$('wrPrev').onclick = () => { if (wStep > 0) { wStep--; renderWrite(); window.scrollTo(0, 0); } };
+$('wrNext').onclick = () => {
+  mark(cur.id, 'write');
+  if (wStep < cur.steps.length - 1) { wStep++; chime(); renderWrite(); window.scrollTo(0, 0); } else show('done');
+};
+
+// ---------- 讀一讀 ----------
+const composed = () => getDraft().map(s => (s || '').trim()).filter(Boolean);
+function renderDone() {
+  $('dnTitle').textContent = cur.em + ' ' + cur.t;
+  const ps = composed();
+  $('dnBox').innerHTML = ps.length ? paras(cur.lv <= 2 ? [ps.join('')] : ps) : '你還沒寫喔，先去「寫一寫」，想不到也沒關係，點提示就能開始！';
+  $('dnPlay').textContent = '🔊 念我的作文'; $('dnPlay').dataset.idle = '🔊 念我的作文';
+  $('dnPlay').style.display = ps.length ? '' : 'none';
+  $('dnChecks').innerHTML = cur.check.map(c => `<button class="ck"><span class="b">✓</span>${esc(c)}</button>`).join('');
+  $('dnCkT').style.display = ps.length ? '' : 'none'; $('dnChecks').style.display = ps.length ? '' : 'none';
+  $('dnSave').style.display = ps.length ? '' : 'none';
+  $('dnMsg').textContent = '';
+}
+$('dnPlay').onclick = () => { mark(cur.id, 'read'); rdToggle($('dnPlay'), $('dnBox')); };
+$('dnChecks').onclick = e => {
+  const c = e.target.closest('.ck'); if (!c) return;
+  c.classList.toggle('on');
+  const all = [...document.querySelectorAll('#dnChecks .ck')];
+  const n = all.filter(x => x.classList.contains('on')).length;
+  $('dnMsg').textContent = n === all.length ? praise() + ' 全部都做到了！' : n ? '很好，你做到 ' + n + ' 項了！' : '';
+};
+function saveWork(title, text, ref) {
+  const w = store.get('wrWorks', []);
+  const i = w.findIndex(x => x.ref === ref);
+  const item = { ref, title, text, date: new Date().toLocaleDateString('zh-TW') };
+  if (i >= 0) w[i] = item; else w.unshift(item);
+  store.set('wrWorks', w);
+}
+$('dnSave').onclick = () => {
+  const ps = composed(); if (!ps.length) return;
+  saveWork(cur.em + ' ' + cur.t, ps, 'L' + cur.id);
+  mark(cur.id, 'save'); $('dnMsg').textContent = praise() + ' 已經存到「我的作品」了！';
+};
+
+// ---------- 點選拼句 ----------
+let bd = null;
+function startBuild() { bd = { picks: [], more: null }; $('bdTitle').textContent = cur.em + ' ' + cur.t; show('build'); renderBuild(); }
+function renderBuild() {
+  const slots = cur.slots, k = bd.picks.length;
+  $('bdPicks').innerHTML = bd.picks.map((p, i) => `<button class="pk" data-i="${i}">${p[0]} ${esc(p[1])}</button>`).join('') + (bd.more ? `<button class="pk" data-i="m">${bd.more[0]} ${esc(bd.more[1])}</button>` : '');
+  const finishedMain = k >= slots.length, q = finishedMain ? cur.more : slots[k];
+  const isDone = finishedMain && bd.more;
+  $('bdQ').textContent = isDone ? '' : (finishedMain ? '再加一句：' : '') + q.q;
+  $('bdOpts').innerHTML = isDone ? '' : q.o.map((o, i) => `<button class="bopt" data-o="${i}"><span class="e">${o[0]}</span>${esc(o[1])}</button>`).join('');
+  const main = bd.picks.map((p, i) => p[1] + (slots[i].p || '')).join('');
+  if (finishedMain) { $('bdBox').hidden = false; $('bdBox').innerHTML = kChars(main + (bd.more ? bd.more[1] : '')); }
+  else $('bdBox').hidden = true;
+  $('bdBtns').hidden = !finishedMain;
+  $('bdMsg').textContent = '';
+  $('bdPlay').textContent = '🔊 念給我聽'; $('bdPlay').dataset.idle = '🔊 念給我聽';
+}
+$('bdOpts').onclick = e => {
+  const b = e.target.closest('.bopt'); if (!b) return;
+  const slots = cur.slots, o = +b.dataset.o;
+  if (bd.picks.length < slots.length) bd.picks.push(slots[bd.picks.length].o[o]);
+  else bd.more = cur.more.o[o];
+  chime(); renderBuild();
+  if (bd.picks.length >= slots.length) { rdReset(); sayPlain(builtText()); if (bd.more) { $('bdMsg').textContent = praise() + ' 你完成了一段話！'; mark(cur.id, 'write'); } }
+};
+const builtText = () => bd.picks.map((p, i) => p[1] + (cur.slots[i].p || '')).join('') + (bd.more ? bd.more[1] : '');
+$('bdPicks').onclick = e => {
+  const b = e.target.closest('.pk'); if (!b) return;
+  if (b.dataset.i === 'm') bd.more = null; else { bd.picks = bd.picks.slice(0, +b.dataset.i); bd.more = null; }
+  renderBuild();
+};
+$('bdPlay').onclick = () => { mark(cur.id, 'read'); rdToggle($('bdPlay'), $('bdBox')); };
+$('bdSave').onclick = () => { saveWork(cur.em + ' ' + cur.t, [builtText()], 'B' + cur.id + '-' + Date.now()); $('bdMsg').textContent = praise() + ' 已經存起來了！'; };
+$('bdAgain').onclick = () => { bd = { picks: [], more: null }; renderBuild(); };
+
+// ---------- 我的作品 ----------
+function renderWorks() {
+  const w = store.get('wrWorks', []);
+  $('wkList').innerHTML = w.length ? w.map((x, i) => `<div class="work"><h4>${esc(x.title)}</h4><div class="d">${esc(x.date)}</div>
+    <div class="txt kbox">${paras(x.text)}</div>
+    <div class="row"><button class="say" data-idle="🔊 念" >🔊 念</button><button class="pill" data-copy="${i}">📋 複製</button><button class="pill" data-del="${i}">🗑 刪除</button></div></div>`).join('')
+    : '<div class="sub">還沒有作品。去寫一篇，按「存到我的作品」吧！</div>';
+}
+$('wkList').onclick = e => {
+  const w = store.get('wrWorks', []);
+  const c = e.target.closest('[data-copy]'), d = e.target.closest('[data-del]');
+  if (c) { try { navigator.clipboard.writeText(w[+c.dataset.copy].text.join('\n')); c.textContent = '✓ 已複製'; } catch (_) {} }
+  if (d) {
+    if (d.dataset.sure) { w.splice(+d.dataset.del, 1); store.set('wrWorks', w); renderWorks(); }
+    else { d.dataset.sure = 1; d.textContent = '再按一次就刪除'; setTimeout(() => { d.dataset.sure = ''; d.textContent = '🗑 刪除'; }, 3000); }
+  }
+};
+// .say 在作品頁：按鈕和文字不在同一個父層，所以另外處理
+document.addEventListener('click', e => {
+  const b = e.target.closest('#wkList .say'); if (!b) return;
+  e.stopImmediatePropagation();
+  const box = b.closest('.work').querySelector('.kbox'); rdToggle(b, box);
+}, true);
+
+// ---------- 離線 ----------
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+renderHome();
+</script>
+</body>
+</html>

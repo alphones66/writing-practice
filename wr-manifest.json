@@ -1,0 +1,13 @@
+{
+  "name": "作文小學堂",
+  "short_name": "作文小學堂",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffe8c2",
+  "theme_color": "#ffe8c2",
+  "icons": [
+    { "src": "wr-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "wr-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
