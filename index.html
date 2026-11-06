@@ -137,6 +137,28 @@
     .work .txt { font-size: 22px; line-height: 1.8; margin: 6px 0; }
     .work .txt .c.done { color: var(--red); }
     .work .txt .c.now { color: #fff; background: var(--red); border-radius: 6px; }
+    /* 稿紙：直式、由右往左、一格一字（標點也占一格） */
+    .gz { --cell: clamp(22px, calc((100vh - 250px) / var(--rows, 20)), 40px); direction: rtl; display: flex; overflow-x: auto; background: #fffdf5; border: 5px solid #e8b05a; border-radius: 14px; padding: 8px; width: min(96vw, 1000px); max-width: 100%; user-select: none; }
+    .gz.small { --cell: clamp(30px, 7vw, 46px); width: auto; max-width: 96vw; }
+    .gcol { direction: ltr; display: flex; flex-direction: column; flex: none; }
+    .gc { position: relative; width: var(--cell); height: var(--cell); border: 1px solid #e9b87a; margin: 0 -1px -1px 0; display: flex; align-items: center; justify-content: center; font-size: calc(var(--cell) * .7); line-height: 1; color: var(--ink); font-weight: 500; }
+    .gc .c { writing-mode: vertical-rl; border-radius: 4px; }
+    .gc .c.x { position: absolute; right: 2%; bottom: -6%; font-size: .8em; }
+    .gc .c.done { color: var(--red); }
+    .gc .c.now { color: #fff; background: var(--red); }
+    .gc.ttl { color: #a34a12; font-weight: bold; }
+    .iss { width: min(900px, 96vw); background: #fffbe8; border: 3px dashed #e8b762; border-radius: 16px; padding: 8px 14px; font-size: 20px; line-height: 1.7; text-align: left; }
+    .iss b { color: var(--red); background: #ffe3d6; border-radius: 6px; padding: 0 4px; }
+    .iss .k { font-weight: bold; color: #a34a12; }
+    .iss + .iss { margin-top: -6px; }
+    .iss .chip { margin-top: 4px; }
+    .sentence { font-size: clamp(30px, 6vw, 52px); font-weight: bold; text-align: center; line-height: 1.8; letter-spacing: 4px; }
+    .sentence .bl { display: inline-block; min-width: 1.1em; border-bottom: 5px solid #e8b05a; color: #bbb; margin: 0 4px; }
+    .sentence .bl.on { border-color: var(--red); animation: pulse .9s infinite; }
+    .sentence .bl.ok { color: var(--ok); border-color: var(--ok); }
+    .popt { min-width: 84px; border: 5px solid var(--orange); background: #fff3b8; border-radius: 20px; font-size: 44px; font-weight: bold; color: #c2410c; padding: 4px 18px; box-shadow: 0 4px 0 #c8721a; }
+    .popt.bad { opacity: .35; animation: shake .35s; }
+    .popt.glow { animation: pulse .9s infinite; border-color: var(--ok); }
     .work .row .pill { font-size: 18px; padding: 6px 14px; }
   </style>
 </head>
@@ -168,7 +190,7 @@
   <button class="round-btn" data-go="hub">⬅️</button>
   <h2 id="mdTitle"></h2>
   <div class="panels" id="mdPanels"></div>
-  <div class="sub-box" id="mdBox"></div>
+  <div class="gz" id="mdBox"></div>
   <div class="row"><button class="pill" id="mdPlay">🔊 念給我聽</button></div>
 </div>
 
@@ -190,9 +212,13 @@
   <textarea id="wrText" placeholder="寫在這裡～想不到也沒關係，先點上面的小提示"></textarea>
   <div class="row">
     <button class="pill" id="wrSay">🔊 念我寫的</button>
+    <button class="pill" id="wrCheck">🔍 幫我檢查</button>
     <button class="pill" id="wrPeek">👀 偷看範文</button>
   </div>
+  <div id="wrIssues" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px"></div>
   <div class="peek" id="wrModel" hidden></div>
+  <div class="sub">📄 我的稿紙（直式，一格一個字）</div>
+  <div class="gz" id="wrPaper"></div>
   <div class="row">
     <button class="pill" id="wrPrev">◀ 上一步</button>
     <button class="pill" id="wrNext">下一步 ▶</button>
@@ -203,10 +229,12 @@
 <div class="screen" id="done">
   <button class="round-btn" data-go="hub">⬅️</button>
   <h2 id="dnTitle"></h2>
-  <div class="sub-box" id="dnBox"></div>
+  <div class="gz" id="dnBox"></div>
   <div class="row"><button class="pill" id="dnPlay">🔊 念我的作文</button></div>
   <div class="sub" id="dnCkT">看看自己做到了哪些？（點一點打勾）</div>
   <div class="cks" id="dnChecks"></div>
+  <div class="row"><button class="pill" id="dnCheck">🔍 幫我檢查錯字和標點</button></div>
+  <div id="dnIssues" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px"></div>
   <div class="msg" id="dnMsg"></div>
   <div class="row">
     <button class="pill" data-go="write">✍️ 回去修改</button>
@@ -221,13 +249,25 @@
   <div class="picks" id="bdPicks"></div>
   <div class="bq" id="bdQ"></div>
   <div class="bopts" id="bdOpts"></div>
-  <div class="sub-box big" id="bdBox" hidden></div>
+  <div class="gz small" id="bdBox" hidden></div>
   <div class="msg" id="bdMsg"></div>
   <div class="row" id="bdBtns" hidden>
     <button class="pill" id="bdPlay">🔊 念給我聽</button>
     <button class="pill" id="bdSave">⭐ 存起來</button>
     <button class="pill" id="bdAgain">🔄 再玩一次</button>
   </div>
+</div>
+
+<!-- 標點小老師 -->
+<div class="screen" id="punct">
+  <button class="round-btn" data-go="home">⬅️</button>
+  <div class="les-title" id="pcTitle"></div>
+  <div class="card" id="pcIntro"></div>
+  <div class="dots" id="pcDots"></div>
+  <div class="sentence" id="pcSent"></div>
+  <div class="bopts" id="pcOpts"></div>
+  <div class="msg" id="pcMsg"></div>
+  <div class="row"><button class="pill" id="pcNext" hidden>下一題 ▶</button></div>
 </div>
 
 <!-- 我的作品 -->
@@ -239,8 +279,10 @@
 
 <script src="data.js"></script>
 <script src="data2.js"></script>
+<script src="data3.js"></script>
+<script src="check.js"></script>
 <script>
-const APP_VER = 'v2026.11.06-1';
+const APP_VER = 'v2026.11.06-2';
 document.getElementById('ver').textContent = APP_VER;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -326,6 +368,36 @@ const sayPlain = t => { karStop(); if (!('speechSynthesis' in window)) return; c
 const kChars = t => Array.from(t).map(c => `<span class="c">${esc(c)}</span>`).join('');
 LESSONS.forEach((l, i) => l.id = i);
 
+// ---------- 稿紙排版（教育部作文格式：直書、由右到左、一格一字、標點占一格、每段開頭空兩格）----------
+const OPEN_P = '「『（《〈【', CLOSE_P = '，。、；：？！」』）》〉】…—';
+function layoutGrid(title, ps, o = {}) {
+  const rows = o.rows || 20, minCols = o.minCols || 8, cols = []; let col = [];
+  const flush = () => { while (col.length && col.length < rows) col.push({ k: 'b' }); if (col.length) { cols.push(col); col = []; } };
+  const push = cell => { col.push(cell); if (col.length === rows) { cols.push(col); col = []; } };
+  if (title) {   // 題目寫在第一行，置中
+    const t = Array.from(title).slice(0, rows), pad = Math.floor((rows - t.length) / 2);
+    for (let i = 0; i < pad; i++) push({ k: 'b' });
+    t.forEach(c => push({ k: 't', c }));
+    flush();
+  }
+  ps.forEach(p => {
+    flush(); push({ k: 'b' }); push({ k: 'b' });   // 每段開頭空兩格
+    Array.from(p).forEach(c => {
+      if (CLOSE_P.includes(c) && col.length === 0 && cols.length) { const last = cols[cols.length - 1]; last[rows - 1].x = c; return; }   // 標點不放在行首：擠到上一行最後一格
+      if (OPEN_P.includes(c) && col.length === rows - 1) push({ k: 'b' });                                                             // 前引號不放在行尾
+      push({ k: 'c', c });
+    });
+  });
+  flush();
+  while (cols.length < minCols) cols.push(Array.from({ length: rows }, () => ({ k: 'b' })));
+  const cell = x => x.k === 'b' ? '<span class="gc"></span>' : x.k === 't' ? `<span class="gc ttl">${esc(x.c)}</span>` : `<span class="gc"><span class="c">${esc(x.c)}</span>${x.x ? `<span class="c x">${esc(x.x)}</span>` : ''}</span>`;
+  return cols.map(c => `<div class="gcol">${c.map(cell).join('')}</div>`).join('');
+}
+const gridOf = (title, ps, o) => { document.documentElement.style.setProperty('--rows', (o && o.rows) || 20); return layoutGrid(title, ps, o); };
+const plainTitle = t => { const i = t.indexOf(' '); return i > 0 ? t.slice(i + 1) : t; };
+const _karShow = karShow;
+karShow = function (box, n) { _karShow(box, n); const el = box.querySelectorAll('.c')[n]; if (el && el.scrollIntoView) { try { el.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (_) {} } };
+
 // ---------- 讀出來：按一下開始，再按暫停，再按從那一句接著讀 ----------
 let rd = { btn: null, st: '', pos: 0 };
 function rdReset() { karStop(); if (rd.btn) rd.btn.textContent = rd.btn.dataset.idle || '🔊'; rd = { btn: null, st: '', pos: 0 }; }
@@ -385,7 +457,7 @@ function renderHome() {
 $('shelf').onclick = e => {
   const b = e.target.closest('.book'); if (!b) return;
   cur = LESSONS[+b.dataset.l];
-  cur.kind === 'build' ? startBuild() : show('hub');
+  cur.kind === 'build' ? startBuild() : cur.kind === 'punct' ? startPunct() : show('hub');
 };
 
 // ---------- 課程主頁 ----------
@@ -405,7 +477,7 @@ function renderModel() {
   $('mdTitle').textContent = cur.t + '（範文）';
   $('mdPanels').innerHTML = (cur.panels || []).map((s, i) => sceneHTML(s).replace('<div class="scene', `<div class="scene`).replace('">', `"><span class="no">${i + 1}</span>`)).join('');
   $('mdPanels').style.display = cur.panels ? 'grid' : 'none';
-  $('mdBox').innerHTML = paras(cur.model);
+  $('mdBox').innerHTML = gridOf(cur.t, cur.model);
   const b = $('mdPlay'); b.textContent = '🔊 念給我聽'; b.dataset.idle = '🔊 念給我聽';
 }
 $('mdPlay').onclick = () => rdToggle($('mdPlay'), $('mdBox'));
@@ -435,9 +507,12 @@ function renderWrite() {
   $('wrModel').hidden = true; $('wrModel').textContent = cur.model.join('\n'); $('wrModel').style.whiteSpace = 'pre-wrap';
   $('wrPrev').style.visibility = wStep ? 'visible' : 'hidden';
   $('wrNext').textContent = wStep === n - 1 ? '寫完了 ✔' : '下一步 ▶';
+  $('wrIssues').innerHTML = '';
+  renderPaper();
 }
-$('wrChips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; const t = $('wrText'); t.value += c.textContent; setDraftAt(wStep, t.value); t.focus(); };
-$('wrText').oninput = () => setDraftAt(wStep, $('wrText').value);
+function renderPaper() { const d = getDraft(), ps = cur.steps.map((_, i) => (d[i] || '').trim()).filter(Boolean); $('wrPaper').innerHTML = gridOf(cur.t, cur.lv <= 2 ? [ps.join('')] : ps); }
+$('wrChips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; const t = $('wrText'); t.value += c.textContent; setDraftAt(wStep, t.value); renderPaper(); t.focus(); };
+$('wrText').oninput = () => { setDraftAt(wStep, $('wrText').value); renderPaper(); };
 $('wrSay').onclick = () => { const t = $('wrText').value.trim(); if (t) sayPlain(t); };
 $('wrPeek').onclick = () => { $('wrModel').hidden = !$('wrModel').hidden; };
 $('wrPrev').onclick = () => { if (wStep > 0) { wStep--; renderWrite(); window.scrollTo(0, 0); } };
@@ -451,7 +526,8 @@ const composed = () => getDraft().map(s => (s || '').trim()).filter(Boolean);
 function renderDone() {
   $('dnTitle').textContent = cur.em + ' ' + cur.t;
   const ps = composed();
-  $('dnBox').innerHTML = ps.length ? paras(cur.lv <= 2 ? [ps.join('')] : ps) : '你還沒寫喔，先去「寫一寫」，想不到也沒關係，點提示就能開始！';
+  $('dnBox').innerHTML = ps.length ? gridOf(cur.t, cur.lv <= 2 ? [ps.join('')] : ps) : '<div style="direction:ltr;padding:12px;font-size:22px;line-height:1.8">你還沒寫喔，先去「寫一寫」，想不到也沒關係，點提示就能開始！</div>';
+  $('dnIssues').innerHTML = '';
   $('dnPlay').textContent = '🔊 念我的作文'; $('dnPlay').dataset.idle = '🔊 念我的作文';
   $('dnPlay').style.display = ps.length ? '' : 'none';
   $('dnChecks').innerHTML = cur.check.map(c => `<button class="ck"><span class="b">✓</span>${esc(c)}</button>`).join('');
@@ -480,6 +556,58 @@ $('dnSave').onclick = () => {
   mark(cur.id, 'save'); $('dnMsg').textContent = praise() + ' 已經存到「我的作品」了！';
 };
 
+// ---------- 錯字與標點的小提醒 ----------
+const KIND = { typo: '✏️ 錯字小提醒', punct: '🔹 標點小提醒', hint: '💡 小建議' };
+function showIssues(box, items, after) {   // items: [{step, text}]
+  const all = [];
+  items.forEach(({ step, text }) => checkText(text).forEach(it => all.push({ ...it, step, text })));
+  if (!all.length) { box.innerHTML = '<div class="iss">🎉 太棒了！我沒有發現需要修改的地方。<br><small>（我只能找出常見的錯字和標點，最後還是請大人幫你看一看喔）</small></div>'; return; }
+  box.innerHTML = `<div class="msg">我發現 ${all.length} 個可以變得更棒的地方：</div>` + all.map((it, i) => {
+    const t = it.text, a = it.s, b = it.e;
+    const ctx = esc(t.slice(Math.max(0, a - 6), a)) + (it.kind === 'hint' ? '' : `<b>${esc(it.found)}</b>`) + esc(t.slice(b, b + 6));
+    return `<div class="iss"><span class="k">${KIND[it.kind]}</span>${items.length > 1 ? `（第 ${it.step + 1} 段）` : ''}<br>${it.kind === 'hint' ? esc(it.found) + '…' : '…' + ctx + '…'}<br>${esc(it.why)}` +
+      (it.fix != null ? `<br><button class="chip" data-i="${i}">${it.fix ? '改成「' + esc(it.fix) + '」' : '把它拿掉'}</button>` : '') + '</div>';
+  }).join('');
+  box.onclick = e => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    const it = all[+c.dataset.i], d = getDraft();
+    d[it.step] = applyFix(d[it.step] || '', it); store.set(draftKey(), d); chime(); after();
+  };
+}
+$('wrCheck').onclick = () => { mark(cur.id, 'check'); const t = $('wrText').value; showIssues($('wrIssues'), [{ step: wStep, text: t }], () => { $('wrText').value = getDraft()[wStep] || ''; renderPaper(); $('wrCheck').click(); }); };
+$('dnCheck').onclick = () => {
+  const d = getDraft(); const items = cur.steps.map((_, i) => ({ step: i, text: d[i] || '' })).filter(x => x.text.trim());
+  showIssues($('dnIssues'), items, () => { renderDone(); $('dnCheck').click(); });
+};
+
+// ---------- 標點小老師 ----------
+const PUNCS = '。，？！：「」';
+let pc = null;
+const pcBlanks = it => it.filter(t => PUNCS.includes(t));
+function startPunct() { pc = { i: 0, k: 0, miss: 0 }; $('pcTitle').textContent = cur.em + ' ' + cur.t; $('pcIntro').innerHTML = '<h4>先認識它</h4>' + cur.intro.map(([p, d]) => `<div class="rowl"><b style="font-size:40px;color:var(--red);min-width:64px;text-align:center">${esc(p)}</b><div>${esc(d)}</div></div>`).join(''); show('punct'); renderPunct(); }
+function renderPunct() {
+  const it = cur.items[pc.i], bl = pcBlanks(it); let b = 0;
+  $('pcDots').textContent = cur.items.map((_, i) => i < pc.i ? '●' : i === pc.i ? '◉' : '○').join(' ');
+  $('pcSent').innerHTML = it.map(t => { if (!PUNCS.includes(t)) return esc(t); const n = b++; return n < pc.k ? `<span class="bl ok">${esc(t)}</span>` : `<span class="bl${n === pc.k ? ' on' : ''}">＿</span>`; }).join('');
+  const done = pc.k >= bl.length, exp = bl[pc.k];
+  $('pcOpts').innerHTML = done ? '' : cur.opts.map(o => `<button class="popt${pc.miss >= 2 && o === exp ? ' glow' : ''}" data-p="${esc(o)}">${esc(o)}</button>`).join('');
+  $('pcNext').hidden = !done; $('pcNext').textContent = pc.i === cur.items.length - 1 ? '完成 ✔' : '下一題 ▶';
+}
+$('pcOpts').onclick = e => {
+  const b = e.target.closest('.popt'); if (!b) return;
+  const it = cur.items[pc.i], bl = pcBlanks(it), exp = bl[pc.k];
+  if (b.dataset.p === exp) {
+    pc.k++; pc.miss = 0; chime(); renderPunct();
+    if (pc.k >= bl.length) { $('pcMsg').textContent = praise() + ' 這句話完成了！'; sayPlain(it.join('')); mark(cur.id, 'write'); }
+    else $('pcMsg').textContent = '';
+  } else { pc.miss++; b.classList.add('bad'); $('pcMsg').textContent = pick(TRY); if (pc.miss >= 2) renderPunct(); }
+};
+$('pcNext').onclick = () => {
+  $('pcMsg').textContent = '';
+  if (pc.i < cur.items.length - 1) { pc.i++; pc.k = 0; pc.miss = 0; renderPunct(); }
+  else { mark(cur.id, 'read'); $('pcMsg').textContent = praise() + ' 全部完成了，你好棒！'; $('pcNext').hidden = true; $('pcOpts').innerHTML = ''; }
+};
+
 // ---------- 點選拼句 ----------
 let bd = null;
 function startBuild() { bd = { picks: [], more: null }; $('bdTitle').textContent = cur.em + ' ' + cur.t; show('build'); renderBuild(); }
@@ -491,7 +619,7 @@ function renderBuild() {
   $('bdQ').textContent = isDone ? '' : (finishedMain ? '再加一句：' : '') + q.q;
   $('bdOpts').innerHTML = isDone ? '' : q.o.map((o, i) => `<button class="bopt" data-o="${i}"><span class="e">${o[0]}</span>${esc(o[1])}</button>`).join('');
   const main = bd.picks.map((p, i) => p[1] + (slots[i].p || '')).join('');
-  if (finishedMain) { $('bdBox').hidden = false; $('bdBox').innerHTML = kChars(main + (bd.more ? bd.more[1] : '')); }
+  if (finishedMain) { $('bdBox').hidden = false; $('bdBox').innerHTML = gridOf('', [main + (bd.more ? bd.more[1] : '')], { rows: 8, minCols: 4 }); }
   else $('bdBox').hidden = true;
   $('bdBtns').hidden = !finishedMain;
   $('bdMsg').textContent = '';
@@ -519,7 +647,7 @@ $('bdAgain').onclick = () => { bd = { picks: [], more: null }; renderBuild(); };
 function renderWorks() {
   const w = store.get('wrWorks', []);
   $('wkList').innerHTML = w.length ? w.map((x, i) => `<div class="work"><h4>${esc(x.title)}</h4><div class="d">${esc(x.date)}</div>
-    <div class="txt kbox">${paras(x.text)}</div>
+    <div class="gz kbox">${gridOf(plainTitle(x.title), x.text)}</div>
     <div class="row"><button class="say" data-idle="🔊 念" >🔊 念</button><button class="pill" data-copy="${i}">📋 複製</button><button class="pill" data-del="${i}">🗑 刪除</button></div></div>`).join('')
     : '<div class="sub">還沒有作品。去寫一篇，按「存到我的作品」吧！</div>';
 }

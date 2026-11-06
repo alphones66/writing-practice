@@ -1,5 +1,5 @@
 const CACHE = 'writing-pages-v1';
-const FILES = ['./', 'index.html', 'data.js', 'data2.js', 'wr-manifest.json', 'wr-icon-180.png', 'wr-icon-192.png', 'wr-icon-512.png'];
+const FILES = ['./', 'index.html', 'data.js', 'data2.js', 'data3.js', 'check.js', 'wr-manifest.json', 'wr-icon-180.png', 'wr-icon-192.png', 'wr-icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)));
