@@ -143,7 +143,12 @@
     .gcol { direction: ltr; display: flex; flex-direction: column; flex: none; }
     .gc { position: relative; width: var(--cell); height: var(--cell); border: 1px solid #e9b87a; margin: 0 -1px -1px 0; display: flex; align-items: center; justify-content: center; font-size: calc(var(--cell) * .7); line-height: 1; color: var(--ink); font-weight: 500; }
     .gc .c { writing-mode: vertical-rl; border-radius: 4px; }
-    .gc .c.x { position: absolute; right: 2%; bottom: -6%; font-size: .8em; }
+    .gc .pn { width: .62em; height: .62em; display: block; }
+    .gc.qo { align-items: flex-start; }
+    .gc.qc { align-items: flex-end; }
+    .gc .c.x { position: absolute; right: 4%; bottom: 4%; font-size: .7em; }
+    .gc .c.x .pn { width: .5em; height: .5em; }
+    .gc .c.x0 { position: absolute; right: 2%; bottom: -6%; font-size: .8em; }
     .gc .c.done { color: var(--red); }
     .gc .c.now { color: #fff; background: var(--red); }
     .gc.ttl { color: #a34a12; font-weight: bold; }
@@ -282,7 +287,7 @@
 <script src="data3.js"></script>
 <script src="check.js"></script>
 <script>
-const APP_VER = 'v2026.11.06-2';
+const APP_VER = 'v2026.11.06-3';
 document.getElementById('ver').textContent = APP_VER;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -390,7 +395,15 @@ function layoutGrid(title, ps, o = {}) {
   });
   flush();
   while (cols.length < minCols) cols.push(Array.from({ length: rows }, () => ({ k: 'b' })));
-  const cell = x => x.k === 'b' ? '<span class="gc"></span>' : x.k === 't' ? `<span class="gc ttl">${esc(x.c)}</span>` : `<span class="gc"><span class="c">${esc(x.c)}</span>${x.x ? `<span class="c x">${esc(x.x)}</span>` : ''}</span>`;
+  const glyph = c => {   // 標點：句號、逗號、頓號用畫的，正好在格子正中間；上引號靠格子上方，下引號靠下方
+    const sv = p => `<svg viewBox="0 0 10 10" class="pn" aria-label="${c}">${p}</svg>`;
+    if (c === '。') return sv('<circle cx="5" cy="5" r="2.1" fill="none" stroke="currentColor" stroke-width="1"/>');
+    if (c === '，') return sv('<circle cx="5" cy="4.6" r="1.4" fill="currentColor"/><path d="M5.3 5.4 Q5.5 7.4 3.8 8.4" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>');
+    if (c === '、') return sv('<path d="M4 3.6 L6.2 6.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>');
+    return esc(c);
+  };
+  const cls = c => c === '「' || c === '『' ? ' qo' : c === '」' || c === '』' ? ' qc' : '';
+  const cell = x => x.k === 'b' ? '<span class="gc"></span>' : x.k === 't' ? `<span class="gc ttl">${esc(x.c)}</span>` : `<span class="gc${cls(x.c)}"><span class="c">${glyph(x.c)}</span>${x.x ? `<span class="c x">${glyph(x.x)}</span>` : ''}</span>`;
   return cols.map(c => `<div class="gcol">${c.map(cell).join('')}</div>`).join('');
 }
 const gridOf = (title, ps, o) => { document.documentElement.style.setProperty('--rows', (o && o.rows) || 20); return layoutGrid(title, ps, o); };
