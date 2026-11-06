@@ -231,6 +231,7 @@
   <textarea id="wrText" placeholder="寫在這裡～想不到也沒關係，先點上面的小提示"></textarea>
   <div class="row">
     <button class="pill" id="wrSay">🔊 念我寫的</button>
+    <button class="pill" id="wrBreak">↵ 另起一段（空兩格）</button>
     <button class="pill" id="wrCheck">🔍 幫我檢查</button>
     <button class="pill" id="wrPeek">👀 偷看範文</button>
   </div>
@@ -303,7 +304,7 @@
 <script src="data4.js"></script>
 <script src="check.js"></script>
 <script>
-const APP_VER = 'v2026.11.06-5';
+const APP_VER = 'v2026.11.06-6';
 document.getElementById('ver').textContent = APP_VER;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -401,8 +402,7 @@ function layoutGrid(title, ps, o = {}) {
     t.forEach(c => push({ k: 't', c }));
     flush();
   }
-  ps.flatMap(p => String(p).split(/
-+/)).map(p => p.trim()).filter(Boolean).forEach(p => {   // 孩子在輸入框按 Enter 換行，就是新的一段
+  ps.flatMap(p => String(p).split(/\n+/)).map(p => p.trim()).filter(Boolean).forEach(p => {   // 孩子在輸入框按 Enter 換行，就是新的一段
     flush(); push({ k: 'b' }); push({ k: 'b' });   // 每段開頭空兩格
     Array.from(p).forEach(c => {
       if (CLOSE_P.includes(c) && col.length === 0 && cols.length) { const last = cols[cols.length - 1]; last[rows - 1].x = c; return; }   // 標點不放在行首：擠到上一行最後一格
@@ -540,10 +540,26 @@ function renderWrite() {
   $('wrIssues').innerHTML = '';
   renderPaper();
 }
-function renderPaper() { const d = getDraft(), ps = cur.steps.map((_, i) => (d[i] || '').trim()).filter(Boolean); $('wrPaper').innerHTML = gridOf(cur.t, cur.lv <= 2 ? [ps.join('')] : ps); }
+// 稿紙的段落：一句話日記、看圖寫短文的每一步會接成同一段，孩子自己按「另起一段」才分段；國小中高年級、國中每一步各自一段
+function paraList() {
+  const d = getDraft(), out = []; let curP = '';
+  cur.steps.forEach((_, i) => {
+    const raw = d[i] || '', segs = raw.split(/\n+/).map(x => x.trim());
+    segs.forEach((seg, k) => {
+      if (cur.lv > 2 && k === 0 && curP) { out.push(curP); curP = ''; }
+      if (k > 0 && curP) { out.push(curP); curP = ''; }
+      curP += seg;
+    });
+    if (cur.lv > 2 || /\n\s*$/.test(raw)) { if (curP) out.push(curP); curP = ''; }
+  });
+  if (curP) out.push(curP);
+  return out.filter(Boolean);
+}
+function renderPaper() { $('wrPaper').innerHTML = gridOf(cur.t, paraList()); }
 $('wrChips').onclick = e => { const c = e.target.closest('.chip'); if (!c) return; const t = $('wrText'); t.value += c.textContent; setDraftAt(wStep, t.value); renderPaper(); t.focus(); };
 $('wrText').oninput = () => { setDraftAt(wStep, $('wrText').value); renderPaper(); };
 $('wrSay').onclick = () => { const t = $('wrText').value.trim(); if (t) sayPlain(t); };
+$('wrBreak').onclick = () => { const t = $('wrText'); if (t.value && !/\n$/.test(t.value)) t.value += '\n'; setDraftAt(wStep, t.value); renderPaper(); t.focus(); };
 $('wrPeek').onclick = () => { $('wrModel').hidden = !$('wrModel').hidden; };
 $('wrPrev').onclick = () => { if (wStep > 0) { wStep--; renderWrite(); window.scrollTo(0, 0); } };
 $('wrNext').onclick = () => {
@@ -552,11 +568,11 @@ $('wrNext').onclick = () => {
 };
 
 // ---------- 讀一讀 ----------
-const composed = () => getDraft().map(s => (s || '').trim()).filter(Boolean);
+const composed = () => paraList();
 function renderDone() {
   $('dnTitle').textContent = cur.em + ' ' + cur.t;
   const ps = composed();
-  $('dnBox').innerHTML = ps.length ? gridOf(cur.t, cur.lv <= 2 ? [ps.join('')] : ps) : '<div style="direction:ltr;padding:12px;font-size:22px;line-height:1.8">你還沒寫喔，先去「寫一寫」，想不到也沒關係，點提示就能開始！</div>';
+  $('dnBox').innerHTML = ps.length ? gridOf(cur.t, ps) : '<div style="direction:ltr;padding:12px;font-size:22px;line-height:1.8">你還沒寫喔，先去「寫一寫」，想不到也沒關係，點提示就能開始！</div>';
   $('dnIssues').innerHTML = '';
   $('dnPics').innerHTML = ps.length ? picsHTML(cur) : '';
   $('dnPlay').textContent = '🔊 念我的作文'; $('dnPlay').dataset.idle = '🔊 念我的作文';
