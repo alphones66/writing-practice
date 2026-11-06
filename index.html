@@ -303,7 +303,7 @@
 <script src="data4.js"></script>
 <script src="check.js"></script>
 <script>
-const APP_VER = 'v2026.11.06-4';
+const APP_VER = 'v2026.11.06-5';
 document.getElementById('ver').textContent = APP_VER;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -401,7 +401,8 @@ function layoutGrid(title, ps, o = {}) {
     t.forEach(c => push({ k: 't', c }));
     flush();
   }
-  ps.forEach(p => {
+  ps.flatMap(p => String(p).split(/
++/)).map(p => p.trim()).filter(Boolean).forEach(p => {   // 孩子在輸入框按 Enter 換行，就是新的一段
     flush(); push({ k: 'b' }); push({ k: 'b' });   // 每段開頭空兩格
     Array.from(p).forEach(c => {
       if (CLOSE_P.includes(c) && col.length === 0 && cols.length) { const last = cols[cols.length - 1]; last[rows - 1].x = c; return; }   // 標點不放在行首：擠到上一行最後一格
