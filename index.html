@@ -176,6 +176,7 @@
     .picrow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: min(960px, 96vw); }
     .picrow .scene { width: min(228px, 44vw); border-width: 3px; border-radius: 14px; }
     .work .picrow .scene { width: min(150px, 30vw); }
+    h4.cat { margin: 10px 8px 4px; font-size: 20px; color: #b8431f; border-left: 8px solid var(--orange); padding-left: 8px; }
     .work .row .pill { font-size: 18px; padding: 6px 14px; }
   </style>
 </head>
@@ -301,10 +302,11 @@
 <script src="data.js"></script>
 <script src="data2.js"></script>
 <script src="data3.js"></script>
+<script src="data5.js"></script>
 <script src="data4.js"></script>
 <script src="check.js"></script>
 <script>
-const APP_VER = 'v2026.11.06-6';
+const APP_VER = 'v2026.11.06-7';
 document.getElementById('ver').textContent = APP_VER;
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -420,7 +422,7 @@ function layoutGrid(title, ps, o = {}) {
     return esc(c);
   };
   const cls = c => c === '「' || c === '『' ? ' qo' : c === '」' || c === '』' ? ' qc' : '';
-  const cell = x => x.k === 'b' ? '<span class="gc"></span>' : x.k === 't' ? `<span class="gc ttl">${esc(x.c)}</span>` : `<span class="gc${cls(x.c)}"><span class="c">${glyph(x.c)}</span>${x.x ? `<span class="c x">${glyph(x.x)}</span>` : ''}</span>`;
+  const cell = x => x.k === 'b' ? '<span class="gc"></span>' : x.k === 't' ? `<span class="gc ttl">${esc(x.c)}</span>` : `<span class="gc${cls(x.c)}"><span class="c" data-ch="${esc(x.c)}">${glyph(x.c)}</span>${x.x ? `<span class="c x" data-ch="${esc(x.x)}">${glyph(x.x)}</span>` : ''}</span>`;
   return cols.map(c => `<div class="gcol">${c.map(cell).join('')}</div>`).join('');
 }
 const gridOf = (title, ps, o) => { document.documentElement.style.setProperty('--rows', (o && o.rows) || 20); return layoutGrid(title, ps, o); };
@@ -432,7 +434,7 @@ karShow = function (box, n) { _karShow(box, n); const el = box.querySelectorAll(
 let rd = { btn: null, st: '', pos: 0 };
 function rdReset() { karStop(); if (rd.btn) rd.btn.textContent = rd.btn.dataset.idle || '🔊'; rd = { btn: null, st: '', pos: 0 }; }
 function rdToggle(btn, box) {
-  const text = Array.from(box.querySelectorAll('.c')).map(c => c.textContent).join('');
+  const text = Array.from(box.querySelectorAll('.c')).map(c => c.dataset.ch || c.textContent).join('');   // 稿紙裡的標點是畫的，字存在 data-ch
   if (!text) return;
   const idle = btn.dataset.idle || (btn.dataset.idle = btn.textContent);
   const long = idle.length > 2;
@@ -475,11 +477,11 @@ const sceneHTML = s => `<div class="scene ${'bg-' + s.bg}">${s.items.map(it => `
 function renderHome() {
   const p = prog(); let h = '';
   LEVELS.forEach((lv, li) => {
-    h += `<h3 class="lv">${lv.ic} ${esc(lv.n)}<small>${esc(lv.d)}</small></h3><div class="books">` +
-      LESSONS.filter(l => l.lv === li).map(l => {
-        const n = Object.keys(p[l.id] || {}).length;
-        return `<button class="book" data-l="${l.id}"><div class="cv">${l.em}</div><div class="t">${esc(l.t)}</div><div class="m">${esc(l.m)}</div><div class="m">${n ? '⭐'.repeat(n) : '　'}</div></button>`;
-      }).join('') + '</div>';
+    const book = l => { const n = Object.keys(p[l.id] || {}).length; return `<button class="book" data-l="${l.id}"><div class="cv">${l.em}</div><div class="t">${esc(l.t)}</div><div class="m">${esc(l.m)}</div><div class="m">${n ? '⭐'.repeat(n) : '　'}</div></button>`; };
+    h += `<h3 class="lv">${lv.ic} ${esc(lv.n)}<small>${esc(lv.d)}</small></h3>`;
+    const list = LESSONS.filter(l => l.lv === li), cats = [...new Set(list.map(l => l.cat).filter(Boolean))];
+    if (cats.length) h += cats.map(c => `<h4 class="cat">${esc(c)}</h4><div class="books">${list.filter(l => l.cat === c).map(book).join('')}</div>`).join('');
+    else h += '<div class="books">' + list.map(book).join('') + '</div>';
   });
   $('shelf').innerHTML = h;
   const w = store.get('wrWorks', []); $('worksN').textContent = w.length ? `已經存了 ${w.length} 篇` : '還沒有作品，來寫第一篇吧！';
