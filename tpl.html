@@ -90,6 +90,18 @@
     .popt { min-width: 84px; border: 5px solid var(--orange); background: #fff3b8; border-radius: 20px; font-size: 44px; font-weight: bold; color: #c2410c; padding: 4px 18px; box-shadow: 0 4px 0 #c8721a; }
     .popt.bad { opacity: .35; animation: shake .35s; }
     .popt.glow { animation: pulse .9s infinite; border-color: var(--ok); }
+    .pcards { display: flex; flex-direction: column; gap: 14px; width: min(940px, 96vw); }
+    .pcard { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; background: #fff; border: 5px solid #f3c27a; border-radius: 24px; padding: 10px; }
+    .pcard .scene { width: min(400px, 88vw); flex: none; border-width: 4px; }
+    .pcard .ptxt { flex: 1; min-width: 260px; display: flex; gap: 10px; align-items: flex-start; }
+    .pcard .say { min-width: 56px; height: 56px; font-size: 28px; }
+    .hz { font-size: clamp(22px, 3.4vw, 30px); line-height: 1.9; text-align: left; font-weight: 500; }
+    .hz .c { border-radius: 6px; transition: color .12s, background .12s; }
+    .hz .c.done { color: var(--red); }
+    .hz .c.now { color: #fff; background: var(--red); }
+    .picrow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: min(960px, 96vw); }
+    .picrow .scene { width: min(228px, 44vw); border-width: 3px; border-radius: 14px; }
+    .work .picrow .scene { width: min(150px, 30vw); }
     .work .row .pill { font-size: 18px; padding: 6px 14px; }
   </style>
 </head>
@@ -120,9 +132,11 @@
 <div class="screen" id="model">
   <button class="round-btn" data-go="hub">⬅️</button>
   <h2 id="mdTitle"></h2>
-  <div class="panels" id="mdPanels"></div>
+  <div class="sub">按喇叭 🔊，一段一段念給你聽</div>
+  <div class="pcards" id="mdCards"></div>
+  <div class="sub">📄 稿紙版（直式）</div>
   <div class="gz" id="mdBox"></div>
-  <div class="row"><button class="pill" id="mdPlay">🔊 念給我聽</button></div>
+  <div class="row"><button class="pill" id="mdPlay">🔊 念全文</button></div>
 </div>
 
 <!-- 學一學 -->
@@ -160,6 +174,7 @@
 <div class="screen" id="done">
   <button class="round-btn" data-go="hub">⬅️</button>
   <h2 id="dnTitle"></h2>
+  <div class="picrow" id="dnPics"></div>
   <div class="gz" id="dnBox"></div>
   <div class="row"><button class="pill" id="dnPlay">🔊 念我的作文</button></div>
   <div class="sub" id="dnCkT">看看自己做到了哪些？（點一點打勾）</div>
@@ -211,6 +226,7 @@
 <script src="data.js"></script>
 <script src="data2.js"></script>
 <script src="data3.js"></script>
+<script src="data4.js"></script>
 <script src="check.js"></script>
 <script>
 const APP_VER = 'v2026.11.06-1';
@@ -333,12 +349,12 @@ $('bRead').onclick = () => show('done');
 // ---------- 看範文 ----------
 function renderModel() {
   $('mdTitle').textContent = cur.t + '（範文）';
-  $('mdPanels').innerHTML = (cur.panels || []).map((s, i) => sceneHTML(s).replace('<div class="scene', `<div class="scene`).replace('">', `"><span class="no">${i + 1}</span>`)).join('');
-  $('mdPanels').style.display = cur.panels ? 'grid' : 'none';
+  $('mdCards').innerHTML = cur.model.map((p, i) => `<div class="pcard">${cur.pics && cur.pics[i] ? sceneHTML(cur.pics[i]) : ''}<div class="ptxt"><button class="say">🔊</button><div class="kbox hz">${kChars(p)}</div></div></div>`).join('');
   $('mdBox').innerHTML = gridOf(cur.t, cur.model);
-  const b = $('mdPlay'); b.textContent = '🔊 念給我聽'; b.dataset.idle = '🔊 念給我聽';
+  const b = $('mdPlay'); b.textContent = '🔊 念全文'; b.dataset.idle = '🔊 念全文';
 }
 $('mdPlay').onclick = () => rdToggle($('mdPlay'), $('mdBox'));
+const picsHTML = l => l && l.pics ? l.pics.map(sceneHTML).join('') : '';
 
 // ---------- 學一學 ----------
 function renderLearn() {
@@ -386,6 +402,7 @@ function renderDone() {
   const ps = composed();
   $('dnBox').innerHTML = ps.length ? gridOf(cur.t, cur.lv <= 2 ? [ps.join('')] : ps) : '<div style="direction:ltr;padding:12px;font-size:22px;line-height:1.8">你還沒寫喔，先去「寫一寫」，想不到也沒關係，點提示就能開始！</div>';
   $('dnIssues').innerHTML = '';
+  $('dnPics').innerHTML = ps.length ? picsHTML(cur) : '';
   $('dnPlay').textContent = '🔊 念我的作文'; $('dnPlay').dataset.idle = '🔊 念我的作文';
   $('dnPlay').style.display = ps.length ? '' : 'none';
   $('dnChecks').innerHTML = cur.check.map(c => `<button class="ck"><span class="b">✓</span>${esc(c)}</button>`).join('');
@@ -505,7 +522,7 @@ $('bdAgain').onclick = () => { bd = { picks: [], more: null }; renderBuild(); };
 function renderWorks() {
   const w = store.get('wrWorks', []);
   $('wkList').innerHTML = w.length ? w.map((x, i) => `<div class="work"><h4>${esc(x.title)}</h4><div class="d">${esc(x.date)}</div>
-    <div class="gz kbox">${gridOf(plainTitle(x.title), x.text)}</div>
+    ${x.ref && x.ref[0] === 'L' && LESSONS[+x.ref.slice(1)] && LESSONS[+x.ref.slice(1)].pics ? `<div class="picrow">${picsHTML(LESSONS[+x.ref.slice(1)])}</div>` : ''}<div class="gz kbox">${gridOf(plainTitle(x.title), x.text)}</div>
     <div class="row"><button class="say" data-idle="🔊 念" >🔊 念</button><button class="pill" data-copy="${i}">📋 複製</button><button class="pill" data-del="${i}">🗑 刪除</button></div></div>`).join('')
     : '<div class="sub">還沒有作品。去寫一篇，按「存到我的作品」吧！</div>';
 }
