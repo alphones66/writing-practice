@@ -1,4 +1,4 @@
-const CACHE = 'writing-pages-v6';
+const CACHE = 'writing-pages-v7';
 const FILES = ['./', 'index.html', 'data.js', 'data2.js', 'data3.js', 'data5.js', 'data4.js', 'check.js', 'wr-manifest.json', 'wr-icon2-180.png', 'wr-icon2-192.png', 'wr-icon2-512.png'];
 
 self.addEventListener('install', event => {
